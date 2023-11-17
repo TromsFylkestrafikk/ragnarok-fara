@@ -46,16 +46,19 @@ class SinkFara extends SinkBase
     /**
      * @inheritdoc
      */
-    public function fetch($id): bool
+    public function fetch($id): int
     {
         $this->faraFiles->setPath($id);
+        $fileSize = 0;
         foreach (FaraFiles::getData($id) as $table => $rows) {
             $content = implode(PHP_EOL, $rows);
-            if (!$this->faraFiles->toFile($this->filename($table), $content)) {
-                return false;
+            $file = $this->faraFiles->toFile($this->filename($table), $content);
+            if (!$file) {
+                return 0;
             }
+            $fileSize += $file->size;
         }
-        return true;
+        return $fileSize;
     }
 
     /**
@@ -73,9 +76,9 @@ class SinkFara extends SinkBase
     /**
      * @inheritdoc
      */
-    public function import($id): bool
+    public function import($id): int
     {
-        return true;
+        return 0;
     }
 
     /**

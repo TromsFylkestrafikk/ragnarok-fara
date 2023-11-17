@@ -32,7 +32,7 @@ class SinkFara extends SinkBase
      */
     public function getFromDate(): Carbon
     {
-        return new Carbon('2023-10-01');
+        return new Carbon('2017-04-27');
     }
 
     /**

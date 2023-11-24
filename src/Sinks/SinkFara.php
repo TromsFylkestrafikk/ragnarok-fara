@@ -3,6 +3,7 @@
 namespace Ragnarok\Fara\Sinks;
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Ragnarok\Fara\Facades\FaraFiles;
 use Ragnarok\Sink\Models\RawFile;
 use Ragnarok\Sink\Services\LocalFiles;
@@ -78,7 +79,12 @@ class SinkFara extends SinkBase
      */
     public function import($id): int
     {
-        return 0;
+        $records = 0;
+        foreach ($this->getLocalFileList($id) as $filename) {
+            $content = $this->faraFiles->getDisk()->get($filename);
+            $records += FaraFiles::exportToDb($filename, $content);
+        }
+        return $records;
     }
 
     /**
@@ -86,6 +92,9 @@ class SinkFara extends SinkBase
      */
     public function deleteImport($id): bool
     {
+        DB::table('fara_stat_load')->where('dat', $id)->delete();
+        DB::table('fara_stat_traffic_cust_profile')->where('dat', $id)->delete();
+        DB::table('fara_stat_traffic_income')->where('dat', $id)->delete();
         return true;
     }
 

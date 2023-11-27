@@ -135,12 +135,9 @@ class FaraFiles
                     $values[$k] = null;
                 }
             }
-            if (count($dbCols) === count($values)) {
-                $feeder->addRecord(array_combine($dbCols, $values));
-                $records += 1;
-            } else {
-                $this->error('Bad input from %s, data row %d: %s', $filename, $index, $csvRow);
-            }
+            // Insert values.
+            $feeder->addRecord(array_combine($dbCols, $values));
+            $records += 1;
         }
         $feeder->flush();
         return $records;

@@ -95,6 +95,19 @@ class SinkFara extends SinkBase
         DB::table('fara_stat_load')->where('dat', $id)->delete();
         DB::table('fara_stat_traffic_cust_profile')->where('dat', $id)->delete();
         DB::table('fara_stat_traffic_income')->where('dat', $id)->delete();
+
+        // Truncate the 'static' tables when all other tables are empty.
+        $count = DB::table('fara_stat_load')->count();
+        $count += DB::table('fara_stat_traffic_cust_profile')->count();
+        $count += DB::table('fara_stat_traffic_income')->count();
+        if ($count === 0) {
+            DB::table('fara_basic_journey')->delete();
+            DB::table('fara_basic_line')->delete();
+            DB::table('fara_basic_stop')->delete();
+            DB::table('fara_basic_template')->delete();
+            DB::table('fara_company')->delete();
+            DB::table('fara_customer_profile')->delete();
+        }
         return true;
     }
 

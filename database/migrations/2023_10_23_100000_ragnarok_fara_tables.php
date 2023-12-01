@@ -86,7 +86,7 @@ return new class extends Migration
 
         Schema::create('fara_customer_profile', function (Blueprint $table)
         {
-            $table->smallInteger('custprofileid')->index();
+            $table->smallInteger('custprofileid')->primary();
             $table->string('custprofiledesc', 50)->nullable();
         });
 

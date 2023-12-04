@@ -2,6 +2,7 @@
 
 namespace Ragnarok\Fara\Sinks;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Ragnarok\Fara\Facades\FaraFiles;
@@ -47,7 +48,7 @@ class SinkFara extends SinkBase
     /**
      * @inheritdoc
      */
-    public function fetch($id): int
+    public function fetch(string $id): int
     {
         $this->faraFiles->setPath($id);
         $fileSize = 0;
@@ -65,7 +66,17 @@ class SinkFara extends SinkBase
     /**
      * @inheritdoc
      */
-    public function removeChunk($id): bool
+    public function getChunkFiles(string $id): Collection
+    {
+        return RawFile::where('sink_id', static::$id)
+            ->where('name', 'LIKE', '%' . $id . '%')
+            ->get();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function removeChunk(string $id): bool
     {
         $this->faraFiles->setPath($id);
         foreach ($this->getLocalFileList($id) as $filename) {
@@ -77,7 +88,7 @@ class SinkFara extends SinkBase
     /**
      * @inheritdoc
      */
-    public function import($id): int
+    public function import(string $id): int
     {
         $records = 0;
         foreach ($this->getLocalFileList($id) as $filename) {
@@ -90,7 +101,7 @@ class SinkFara extends SinkBase
     /**
      * @inheritdoc
      */
-    public function deleteImport($id): bool
+    public function deleteImport(string $id): bool
     {
         DB::table('fara_stat_load')->where('dat', $id)->delete();
         DB::table('fara_stat_traffic_cust_profile')->where('dat', $id)->delete();

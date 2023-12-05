@@ -66,6 +66,19 @@ class SinkFara extends SinkBase
     /**
      * @inheritdoc
      */
+    public function getChunkVersion(string $id): string
+    {
+        $checksums = RawFile::where('sink_id', static::$id)
+            ->where('name', 'LIKE', '%' . $id . '%')
+            ->orderBy('name', 'asc')
+            ->pluck('checksum')
+            ->toArray();
+        return md5(implode('', $checksums));
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getChunkFiles(string $id): Collection
     {
         return RawFile::where('sink_id', static::$id)

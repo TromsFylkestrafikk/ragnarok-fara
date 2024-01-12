@@ -2,33 +2,18 @@
 
 namespace Ragnarok\Fara\Sinks;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Ragnarok\Fara\Facades\FaraFiles;
+use Ragnarok\Fara\Facades\FaraImporter;
 use Ragnarok\Sink\Models\SinkFile;
-use Ragnarok\Sink\Models\RawFile;
-use Ragnarok\Sink\Services\LocalFiles;
+use Ragnarok\Sink\Services\ChunkArchive;
+use Ragnarok\Sink\Services\ChunkExtractor;
 use Ragnarok\Sink\Sinks\SinkBase;
-use Ragnarok\Sink\Traits\LogPrintf;
 
 class SinkFara extends SinkBase
 {
-    use LogPrintf;
-
     public static $id = "fara";
     public static $title = "Fara";
-
-    /**
-     * @var LocalFiles
-     */
-    protected $faraFiles = null;
-
-    public function __construct()
-    {
-        $this->faraFiles = new LocalFiles(static::$id);
-        $this->logPrintfInit('[SinkFara]: ');
-    }
 
     /**
      * @inheritdoc
@@ -51,42 +36,12 @@ class SinkFara extends SinkBase
      */
     public function fetch(string $id): SinkFile|null
     {
-        return null;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getChunkVersion(string $id): string
-    {
-        $checksums = RawFile::where('sink_id', static::$id)
-            ->where('name', 'LIKE', '%' . $id . '%')
-            ->orderBy('name', 'asc')
-            ->pluck('checksum')
-            ->toArray();
-        return md5(implode('', $checksums));
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getChunkFiles(string $id): Collection
-    {
-        return RawFile::where('sink_id', static::$id)
-            ->where('name', 'LIKE', '%' . $id . '%')
-            ->get();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function removeChunk(string $id): bool
-    {
-        $this->faraFiles->setPath($id);
-        foreach ($this->getLocalFileList($id) as $filename) {
-            $this->faraFiles->rmfile(basename($filename));
+        $archive = new ChunkArchive(static::$id, $id);
+        foreach (FaraFiles::getData($id) as $table => $rows) {
+            $content = implode(PHP_EOL, $rows);
+            $archive->addFromString($this->filename($table), $content);
         }
-        return true;
+        return $archive->save()->getFile();
     }
 
     /**
@@ -94,7 +49,12 @@ class SinkFara extends SinkBase
      */
     public function import(string $id, SinkFile $file): int
     {
-        return 0;
+        $count = 0;
+        $extractor = new ChunkExtractor(static::$id, $file);
+        foreach ($extractor->getFiles() as $filepath) {
+            $count += FaraImporter::import($filepath);
+        }
+        return $count;
     }
 
     /**
@@ -102,14 +62,8 @@ class SinkFara extends SinkBase
      */
     public function deleteImport(string $id, SinkFile $file): bool
     {
+        FaraImporter::deleteImport($id);
         return true;
-    }
-
-    protected function getLocalFileList($id)
-    {
-        return RawFile::where('sink_id', static::$id)
-            ->where('name', 'LIKE', '%' . $id . '%')
-            ->pluck('name');
     }
 
     protected function filename($name): string

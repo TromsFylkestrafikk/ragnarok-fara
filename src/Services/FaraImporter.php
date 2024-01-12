@@ -1,0 +1,79 @@
+<?php
+
+namespace Ragnarok\Fara\Services;
+
+use Illuminate\Support\Facades\DB;
+use Ragnarok\Sink\Services\DbBulkInsert;
+use Ragnarok\Sink\Traits\LogPrintf;
+
+class FaraImporter
+{
+    use LogPrintf;
+
+    /**
+     * @var array
+     */
+    protected $localTables = [
+        'basicjourney.csv' => 'fara_basic_journey',
+        'basicline.csv' => 'fara_basic_line',
+        'basicstop.csv' => 'fara_basic_stop',
+        'basictemplate.csv' => 'fara_basic_template',
+        'company.csv' => 'fara_company',
+        'customerprofile.csv' => 'fara_customer_profile',
+        'statload.csv' => 'fara_stat_load',
+        'stattrafficcustprofile.csv' => 'fara_stat_traffic_cust_profile',
+        'stattrafficincome.csv' => 'fara_stat_traffic_income',
+    ];
+
+    public function __construct()
+    {
+        $this->logPrintfInit('[FaraImporter]: ');
+    }
+
+    public function import(string $file)
+    {
+        $records = 0;
+        if (($handle = fopen($file, 'r')) !== false) {
+            $table = $this->localTables[basename($file)];
+            $feeder = new DbBulkInsert($table, 'upsert');
+            $dbCols = fgetcsv($handle);
+            $feeder->unique($dbCols);
+            while (($values = fgetcsv($handle)) !== false) {
+                foreach ($values as $k => $val) {
+                    $value = trim($val, '"');
+                    if (strlen($value) === 0) $values[$k] = null;
+                }
+                $feeder->addRecord(array_combine($dbCols, $values));
+                $records += 1;
+            }
+            fclose($handle);
+            $feeder->flush();
+        }
+        $this->debug('%s: Imported %d records', basename($file), $records);
+        return $records;
+    }
+
+    public function deleteImport(string $id)
+    {
+        DB::table('fara_stat_load')->where('dat', $id)->delete();
+        DB::table('fara_stat_traffic_cust_profile')->where('dat', $id)->delete();
+        DB::table('fara_stat_traffic_income')->where('dat', $id)->delete();
+
+        // Truncate the 'static' tables when all other tables are empty.
+        $count = DB::table('fara_stat_load')->count();
+        $count += DB::table('fara_stat_traffic_cust_profile')->count();
+        $count += DB::table('fara_stat_traffic_income')->count();
+        if ($count === 0) {
+            DB::table('fara_basic_journey')->delete();
+            DB::table('fara_basic_line')->delete();
+            DB::table('fara_basic_stop')->delete();
+            DB::table('fara_basic_template')->delete();
+            DB::table('fara_company')->delete();
+            DB::table('fara_customer_profile')->delete();
+            $this->debug('All tables were truncated.');
+            return $this;
+        }
+        $this->debug('Import for %s was deleted.', $id);
+        return $this;
+    }
+}

@@ -14,6 +14,7 @@ class FaraImporter
      * @var array
      */
     protected $localTables = [
+        'arch.csv' => 'fara_arch',
         'basicjourney.csv' => 'fara_basic_journey',
         'basicline.csv' => 'fara_basic_line',
         'basicstop.csv' => 'fara_basic_stop',
@@ -55,6 +56,7 @@ class FaraImporter
 
     public function deleteImport(string $id)
     {
+        DB::table('fara_arch')->whereDate('eventdatetime', $id)->delete();
         DB::table('fara_stat_load')->where('dat', $id)->delete();
         DB::table('fara_stat_traffic_cust_profile')->where('dat', $id)->delete();
         DB::table('fara_stat_traffic_income')->where('dat', $id)->delete();

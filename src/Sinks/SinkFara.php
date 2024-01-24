@@ -3,6 +3,7 @@
 namespace Ragnarok\Fara\Sinks;
 
 use Illuminate\Support\Carbon;
+use Ragnarok\Fara\Facades\FaraArchFiles;
 use Ragnarok\Fara\Facades\FaraFiles;
 use Ragnarok\Fara\Facades\FaraImporter;
 use Ragnarok\Sink\Models\SinkFile;
@@ -38,6 +39,12 @@ class SinkFara extends SinkBase
     {
         $archive = new ChunkArchive(static::$id, $id);
         foreach (FaraFiles::getData($id) as $table => $rows) {
+            $content = implode(PHP_EOL, $rows);
+            $archive->addFromString($this->filename($table), $content);
+        }
+
+        // Fetch data from second database.
+        foreach (FaraArchFiles::getData($id) as $table => $rows) {
             $content = implode(PHP_EOL, $rows);
             $archive->addFromString($this->filename($table), $content);
         }

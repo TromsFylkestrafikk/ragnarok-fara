@@ -66,6 +66,16 @@ class SinkFara extends SinkBase
         return true;
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function filenameToChunkId(string $filename): string|null
+    {
+        $matches = [];
+        $hits = preg_match('|(?P<date>\d{4}-\d{2}-\d{2})\.zip$|', $filename, $matches);
+        return $hits ? $matches['date'] : null;
+    }
+
     protected function filename($name): string
     {
         return $name . '.csv';

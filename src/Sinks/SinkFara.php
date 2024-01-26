@@ -18,6 +18,24 @@ class SinkFara extends SinkBase
     /**
      * @inheritdoc
      */
+    public function destinationTables(): array
+    {
+        return [
+            'fara_basic_journey' => 'Journey information',
+            'fara_basic_line' => 'Line information',
+            'fara_basic_stop' => 'Stop place details',
+            'fara_basic_template' => 'Ticket templates',
+            'fara_company' => 'Company details',
+            'fara_customer_profile' => 'Customer profile (ticket type)',
+            'fara_stat_load' => 'Product information with stop/zone reference',
+            'fara_stat_traffic_cust_profile' => 'Product information',
+            'fara_stat_traffic_income' => 'Product and payment information',
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getFromDate(): Carbon
     {
         return new Carbon('2017-04-27');

@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('fara_basic_journey', function (Blueprint $table)
         {
-            $table->unsignedBigInteger('journeyida')->primary();
-            $table->unsignedBigInteger('lineida');
-            $table->integer('journeyno');
-            $table->unsignedBigInteger('calendarida');
+            $table->unsignedBigInteger('journeyida')->primary()->comment('Journey ID');
+            $table->unsignedBigInteger('lineida')->comment('Line ID');
+            $table->integer('journeyno')->comment('Journey number');
+            $table->unsignedBigInteger('calendarida')->comment('Calendar ID');
             $table->unsignedBigInteger('remarkida')->nullable();
             $table->unsignedBigInteger('remark2ida')->nullable();
             $table->integer('destnodep')->nullable();
-            $table->char('publiclineno', 8)->nullable();
-            $table->unsignedBigInteger('journeypatternida')->nullable();
+            $table->char('publiclineno', 8)->nullable()->comment('Public line number');
+            $table->unsignedBigInteger('journeypatternida')->nullable()->comment('Journey pattern ID');
             $table->integer('departuretime');
             $table->smallInteger('packagetour')->nullable();
             $table->smallInteger('announcementtype')->nullable();
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->integer('transporttypeid')->nullable();
             $table->integer('destnoarrival')->nullable();
             $table->integer('trafficdays')->nullable();
-            $table->unsignedBigInteger('serviceproviderid');
+            $table->unsignedBigInteger('serviceproviderid')->comment('Service provider/Company ID');
             $table->integer('inversecalendar');
             $table->integer('direction');
             $table->string('tarifftype', 30)->nullable();
@@ -37,45 +37,45 @@ return new class extends Migration
 
         Schema::create('fara_basic_line', function (Blueprint $table)
         {
-            $table->unsignedBigInteger('lineida')->primary();
-            $table->unsignedBigInteger('routeproviderid');
-            $table->integer('linenumber');
-            $table->string('linename', 50)->nullable();
+            $table->unsignedBigInteger('lineida')->primary()->comment('Line ID');
+            $table->unsignedBigInteger('routeproviderid')->comment('Route provider/Company ID');
+            $table->integer('linenumber')->comment('Line number');
+            $table->string('linename', 50)->nullable()->comment('Line name');
             $table->unsignedBigInteger('tariffid')->nullable();
         });
 
         Schema::create('fara_basic_stop', function (Blueprint $table)
         {
-            $table->integer('stopno')->primary();
-            $table->string('stopname', 50);
-            $table->char('stopshortname', 6);
+            $table->integer('stopno')->primary()->comment('Stop number/ID. Not NSR stop place number');
+            $table->string('stopname', 50)->comment('Stop place name');
+            $table->char('stopshortname', 6)->comment('Shortened stop place name');
             $table->char('tariffzone', 6)->nullable();
-            $table->integer('xcoordinate')->nullable();
-            $table->integer('ycoordinate')->nullable();
-            $table->integer('zoneid');
-            $table->smallInteger('stoptype')->nullable();
+            $table->integer('xcoordinate')->nullable()->comment('X coordinate. Not GPS value');
+            $table->integer('ycoordinate')->nullable()->comment('Y coordinate. Not GPS value');
+            $table->integer('zoneid')->comment('Zone ID');
+            $table->smallInteger('stoptype')->nullable()->comment('Stop type');
         });
 
         Schema::create('fara_basic_template', function (Blueprint $table)
         {
-            $table->unsignedBigInteger('templateid')->primary();
-            $table->unsignedBigInteger('companyid');
-            $table->integer('templateno');
+            $table->unsignedBigInteger('templateid')->primary()->comment('Template ID. Ticket type');
+            $table->unsignedBigInteger('companyid')->comment('Company ID');
+            $table->integer('templateno')->comment('Template number');
             $table->integer('classid');
-            $table->string('description', 50);
-            $table->integer('seqno');
+            $table->string('description', 50)->comment('Ticket description');
+            $table->integer('seqno')->comment('Sequence number');
         });
 
         Schema::create('fara_company', function (Blueprint $table)
         {
-            $table->unsignedBigInteger('companyid')->primary();
-            $table->string('companyname', 50);
+            $table->unsignedBigInteger('companyid')->primary()->comment('Company ID');
+            $table->string('companyname', 50)->comment('Company name');
             $table->integer('countrycode');
             $table->integer('networkno');
-            $table->integer('companyno');
+            $table->integer('companyno')->comment('Company number');
             $table->integer('isself');
-            $table->char('companyshortname', 10)->nullable();
-            $table->char('orgno', 15)->nullable();
+            $table->char('companyshortname', 10)->nullable()->comment('Shortened company name');
+            $table->char('orgno', 15)->nullable()->comment('Org. number');
             $table->unsignedBigInteger('carddbcompanyid');
             $table->string('csurl', 50)->nullable();
             $table->integer('islocal');
@@ -86,26 +86,26 @@ return new class extends Migration
 
         Schema::create('fara_customer_profile', function (Blueprint $table)
         {
-            $table->smallInteger('custprofileid')->primary();
-            $table->string('custprofiledesc', 50)->nullable();
+            $table->smallInteger('custprofileid')->primary()->comment('Customer profile ID');
+            $table->string('custprofiledesc', 50)->nullable()->comment('Description');
         });
 
         Schema::create('fara_stat_load', function (Blueprint $table)
         {
-            $table->date('dat');
-            $table->unsignedBigInteger('companyid');
-            $table->unsignedBigInteger('routecompanyid');
-            $table->integer('linenumber');
-            $table->integer('journeyno');
-            $table->smallInteger('assistanceno');
-            $table->unsignedBigInteger('prodcompanyid');
-            $table->integer('prodtemplateno');
-            $table->smallInteger('custprofileid');
-            $table->integer('zone');
-            $table->integer('stop');
+            $table->date('dat')->comment('Date');
+            $table->unsignedBigInteger('companyid')->comment('Company ID');
+            $table->unsignedBigInteger('routecompanyid')->comment('Route provider/Company ID');
+            $table->integer('linenumber')->comment('Line number');
+            $table->integer('journeyno')->comment('Journey number');
+            $table->smallInteger('assistanceno')->comment('Assistance number');
+            $table->unsignedBigInteger('prodcompanyid')->comment('Product owner/Company ID');
+            $table->integer('prodtemplateno')->comment('Product template number');
+            $table->smallInteger('custprofileid')->comment('Customer profile ID');
+            $table->integer('zone')->comment('Zone ID');
+            $table->integer('stop')->comment('Stop ID');
             $table->integer('numberofproductsuse')->nullable();
             $table->integer('numberofproductsoff');
-            $table->timestamp('lastupdated');
+            $table->timestamp('lastupdated')->comment('Last updated. Date/time');
             $table->primary([
                 'dat',
                 'stop',
@@ -123,19 +123,19 @@ return new class extends Migration
 
         Schema::create('fara_stat_traffic_cust_profile', function (Blueprint $table)
         {
-            $table->date('dat')->index();
-            $table->unsignedBigInteger('companyid');
-            $table->unsignedBigInteger('operatorid');
-            $table->unsignedBigInteger('routecompanyid');
-            $table->integer('linenumber');
-            $table->integer('journeyno');
-            $table->smallInteger('assistanceno');
-            $table->unsignedBigInteger('prodcompanyid');
-            $table->integer('prodtemplateno');
-            $table->smallInteger('custprofileid');
-            $table->integer('vehiclerunno');
+            $table->date('dat')->index()->comment('Date');
+            $table->unsignedBigInteger('companyid')->comment('Company ID');
+            $table->unsignedBigInteger('operatorid')->comment('Operator ID');
+            $table->unsignedBigInteger('routecompanyid')->comment('Route provider/Company ID');
+            $table->integer('linenumber')->comment('Line number');
+            $table->integer('journeyno')->comment('Journey number');
+            $table->smallInteger('assistanceno')->comment('Assistance number');
+            $table->unsignedBigInteger('prodcompanyid')->comment('Product owner/Company ID');
+            $table->integer('prodtemplateno')->comment('Product template number');
+            $table->smallInteger('custprofileid')->comment('Customer profile ID');
+            $table->integer('vehiclerunno')->comment('Vehicle run number');
             $table->integer('numberofproductsuse')->nullable();
-            $table->timestamp('lastupdated')->nullable();
+            $table->timestamp('lastupdated')->nullable()->comment('Last updated. Date/time');
             $table->primary([
                 'dat',
                 'companyid',
@@ -153,22 +153,22 @@ return new class extends Migration
 
         Schema::create('fara_stat_traffic_income', function (Blueprint $table)
         {
-            $table->date('dat')->index();
-            $table->unsignedBigInteger('companyid');
-            $table->unsignedBigInteger('operatorid');
-            $table->unsignedBigInteger('routecompanyid');
-            $table->integer('linenumber');
-            $table->integer('journeyno');
-            $table->smallInteger('assistanceno');
-            $table->unsignedBigInteger('prodcompanyid');
-            $table->integer('prodtemplateno');
-            $table->smallInteger('custprofileid');
-            $table->smallInteger('paymentmethodid');
-            $table->integer('vehiclerunno');
+            $table->date('dat')->index()->comment('Date');
+            $table->unsignedBigInteger('companyid')->comment('Company ID');
+            $table->unsignedBigInteger('operatorid')->comment('Operator ID');
+            $table->unsignedBigInteger('routecompanyid')->comment('Route provider/Company ID');
+            $table->integer('linenumber')->comment('Line number');
+            $table->integer('journeyno')->comment('Journey number');
+            $table->smallInteger('assistanceno')->comment('Assistance number');
+            $table->unsignedBigInteger('prodcompanyid')->comment('Product owner/Company ID');
+            $table->integer('prodtemplateno')->comment('Product template number');
+            $table->smallInteger('custprofileid')->comment('Customer profile ID');
+            $table->smallInteger('paymentmethodid')->comment('Payment method ID');
+            $table->integer('vehiclerunno')->comment('Vehicle run number');
             $table->unsignedFloat('amountofproductssale', 10, 3)->nullable()->default(NULL);
             $table->integer('numberofproductssale')->nullable();
             $table->unsignedBigInteger('clearingperiodida');
-            $table->timestamp('lastupdated')->nullable();
+            $table->timestamp('lastupdated')->nullable()->comment('Last updated. Date/time');
             $table->primary([
                 'dat',
                 'companyid',

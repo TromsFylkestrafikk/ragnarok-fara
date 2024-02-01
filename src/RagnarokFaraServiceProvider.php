@@ -30,6 +30,7 @@ class RagnarokFaraServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/ragnarok_fara.php', 'database.connections');
+        $this->mergeConfigFrom(__DIR__ . '/../config/ragnarok_fara_arch.php', 'database.connections');
     }
 
     /**

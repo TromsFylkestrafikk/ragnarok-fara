@@ -22,6 +22,7 @@ class SinkFara extends SinkBase
     public function destinationTables(): array
     {
         return [
+            'fara_arch' => 'Ticket sale query (from the Arch database)',
             'fara_basic_journey' => 'Journey information',
             'fara_basic_line' => 'Line information',
             'fara_basic_stop' => 'Stop place details',

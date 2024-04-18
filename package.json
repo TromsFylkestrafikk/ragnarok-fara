@@ -1,6 +1,6 @@
 {
   "name": "ragnarok-fara",
-  "version": "0.0.1-dev",
+  "version": "0.1.0",
   "description": "Ragnarok Fara data sink",
   "main": "index.js",
   "directories": {

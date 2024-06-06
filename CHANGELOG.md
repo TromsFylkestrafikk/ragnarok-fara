@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+### Fixed
+- Allowing negative sales amount to be stored in the database.
+
 ## [0.1.0] – 2024-04-18
 
 ### Added

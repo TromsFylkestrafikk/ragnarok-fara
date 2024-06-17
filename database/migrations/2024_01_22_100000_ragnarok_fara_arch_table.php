@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('fara_arch', function (Blueprint $table)
         {
             $table->unsignedBigInteger('transactionida')->comment('Transaction ID. PS: Duplicates allowed');
-            $table->timestamp('eventdatetime')->comment('Date/time');
+            $table->timestamp('eventdatetime')->comment('Date/time of event');
             $table->unsignedBigInteger('operatorcompanyid')->comment('Reference: fara_company.companyid');
             $table->unsignedBigInteger('operatorid')->comment('Operator ID');
             $table->integer('producttemplateno')->comment('Reference: fara_basic_template.templateid');

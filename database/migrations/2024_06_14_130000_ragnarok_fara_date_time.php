@@ -12,10 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $this->timestampToDatetime('fara_stat_load', 'lastupdated', 'Last updated. Date/time');
+        $this->timestampToDatetime('fara_stat_load', 'lastupdated', 'Last updated. Date/time', false);
         $this->timestampToDatetime('fara_stat_traffic_cust_profile', 'lastupdated', 'Last updated. Date/time');
         $this->timestampToDatetime('fara_stat_traffic_income', 'lastupdated', 'Last updated. Date/time');
-        $this->timestampToDatetime('fara_arch', 'eventdatetime', 'Date/time of event');
+        $this->timestampToDatetime('fara_arch', 'eventdatetime', 'Date/time of event', false);
     }
 
     /**
@@ -26,7 +26,7 @@ return new class extends Migration
         //
     }
 
-    protected function timestampToDatetime(string $tableName, string $columnName, string $comment)
+    protected function timestampToDatetime(string $tableName, string $columnName, string $comment, $nullable = true)
     {
         Schema::table($tableName, function (Blueprint $table) use ($columnName){
             $table->renameColumn($columnName, $columnName . '_old');
@@ -37,6 +37,12 @@ return new class extends Migration
         });
 
         DB::table($tableName)->update([$columnName => DB::raw($columnName . '_old')]);
+
+        if (!$nullable) {
+            Schema::table($tableName, function (Blueprint $table) use ($columnName, $comment) {
+                $table->dateTime($columnName)->nullable(false)->comment($comment)->change();
+            });
+        }
 
         Schema::table($tableName, function (Blueprint $table) use ($columnName) {
             $table->dropColumn($columnName . '_old');

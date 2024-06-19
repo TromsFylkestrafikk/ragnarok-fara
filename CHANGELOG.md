@@ -4,6 +4,9 @@
 ### Fixed
 - Allowing negative sales amount to be stored in the database.
 
+### Changed
+- All timestamp database columns converted to datetime.
+
 ## [0.1.0] – 2024-04-18
 
 ### Added

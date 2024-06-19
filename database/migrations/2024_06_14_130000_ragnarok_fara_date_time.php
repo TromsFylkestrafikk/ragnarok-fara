@@ -26,6 +26,17 @@ return new class extends Migration
         //
     }
 
+    /**
+     * Convert a db column from TIMESTAMP to DATETIME.
+     *
+     * Unfortunately Laravel's ->change() doesn't take on this kind of
+     * conversion so it have to be done manually:
+     * 1) Rename original column to ..._old
+     * 2) Create new DATETIME column with same name as original.
+     * 3) Copy data from original to new column (No need for conversion as this
+     *    is handled by mysql/mariadb)
+     * 4) Drop original, renamed column
+     */
     protected function timestampToDatetime(string $tableName, string $columnName, string $comment, $nullable = true)
     {
         Schema::table($tableName, function (Blueprint $table) use ($columnName){

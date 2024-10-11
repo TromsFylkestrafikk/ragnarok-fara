@@ -6,6 +6,10 @@
 
 ### Changed
 - All timestamp database columns converted to datetime.
+- Several text based db columns widened to avoid future problems.
+
+### Removed
+- Removed many unused db columns.
 
 ## [0.1.0] – 2024-04-18
 

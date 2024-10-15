@@ -77,8 +77,8 @@ class FaraImporter
             // No column filter available for this table.
             return $columns;
         }
-        $filter = $this->columnFilter[$tableName];
-        return array_filter($columns, fn($col) => !in_array($col, $filter));
+        $ignoreCols = $this->columnFilter[$tableName];
+        return array_filter($columns, fn($col) => !in_array($col, $ignoreCols));
     }
 
     public function deleteImport(string $id)

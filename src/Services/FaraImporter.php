@@ -26,6 +26,24 @@ class FaraImporter
         'stattrafficincome.csv' => 'fara_stat_traffic_income',
     ];
 
+    /**
+     * Columns to be ignored.
+     *
+     * @var array
+     */
+    protected $columnFilter = [
+        'fara_arch' => [],
+        'fara_basic_journey' => ['remarkida', 'remark2ida', 'packagetour', 'announcementtype', 'tariffid', 'tarifftype'],
+        'fara_basic_line' => ['tariffid'],
+        'fara_basic_stop' => ['stopshortname', 'tariffzone', 'xcoordinate', 'ycoordinate'],
+        'fara_basic_template' => [],
+        'fara_company' => ['companyshortname', 'csurl', 'address', 'postalcodeid', 'accountnumber'],
+        'fara_customer_profile' => [],
+        'fara_stat_load' => [],
+        'fara_stat_traffic_cust_profile' => [],
+        'fara_stat_traffic_income' => [],
+    ];
+
     public function __construct()
     {
         $this->logPrintfInit('[FaraImporter]: ');
@@ -37,14 +55,17 @@ class FaraImporter
         if (($handle = fopen($file, 'r')) !== false) {
             $table = $this->localTables[basename($file)];
             $feeder = new DbBulkInsert($table, 'upsert');
-            $dbCols = fgetcsv($handle);
+            $dbCols = array_diff(fgetcsv($handle), $this->columnFilter[$table]);
             $feeder->unique($dbCols);
             while (($values = fgetcsv($handle)) !== false) {
                 foreach ($values as $k => $val) {
                     $value = trim($val, '"');
-                    if (strlen($value) === 0) $values[$k] = null;
+                    if (strlen($value) === 0) {
+                        $values[$k] = null;
+                    }
                 }
-                $feeder->addRecord(array_combine($dbCols, $values));
+                $dbVals = array_filter($values, fn($key) => array_key_exists($key, $dbCols), ARRAY_FILTER_USE_KEY);
+                $feeder->addRecord(array_combine($dbCols, $dbVals));
                 $records += 1;
             }
             fclose($handle);

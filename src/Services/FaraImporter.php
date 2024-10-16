@@ -32,10 +32,16 @@ class FaraImporter
      * @var array
      */
     protected $columnFilter = [
+        'fara_arch' => [],
         'fara_basic_journey' => ['remarkida', 'remark2ida', 'packagetour', 'announcementtype', 'tariffid', 'tarifftype'],
         'fara_basic_line' => ['tariffid'],
         'fara_basic_stop' => ['stopshortname', 'tariffzone', 'xcoordinate', 'ycoordinate'],
+        'fara_basic_template' => [],
         'fara_company' => ['companyshortname', 'csurl', 'address', 'postalcodeid', 'accountnumber'],
+        'fara_customer_profile' => [],
+        'fara_stat_load' => [],
+        'fara_stat_traffic_cust_profile' => [],
+        'fara_stat_traffic_income' => [],
     ];
 
     public function __construct()
@@ -49,7 +55,7 @@ class FaraImporter
         if (($handle = fopen($file, 'r')) !== false) {
             $table = $this->localTables[basename($file)];
             $feeder = new DbBulkInsert($table, 'upsert');
-            $dbCols = $this->getFilteredColumns($table, fgetcsv($handle));
+            $dbCols = array_diff(fgetcsv($handle), $this->columnFilter[$table]);
             $feeder->unique($dbCols);
             while (($values = fgetcsv($handle)) !== false) {
                 foreach ($values as $k => $val) {
@@ -67,18 +73,6 @@ class FaraImporter
         }
         $this->debug('%s: Imported %d records', basename($file), $records);
         return $records;
-    }
-
-    // Remove column names as specified by the columnFilter array without re-
-    // indexing the returned array.
-    protected function getFilteredColumns(string $tableName, array $columns): array
-    {
-        if (!array_key_exists($tableName, $this->columnFilter)) {
-            // No column filter available for this table.
-            return $columns;
-        }
-        $ignoreCols = $this->columnFilter[$tableName];
-        return array_filter($columns, fn($col) => !in_array($col, $ignoreCols));
     }
 
     public function deleteImport(string $id)

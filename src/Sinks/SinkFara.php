@@ -16,7 +16,8 @@ class SinkFara extends SinkBase
     public static $id = "fara";
     public static $title = "Fara";
 
-    public $cronRefetch = "* * * * *";
+    // Re-fetch the 12th every month at 03:00
+    public $cronRefetch = "0 3 12 * *";
 
     /**
      * @inheritdoc

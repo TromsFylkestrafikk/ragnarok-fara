@@ -16,6 +16,9 @@ class SinkFara extends SinkBase
     public static $id = "fara";
     public static $title = "Fara";
 
+    // Re-fetch the 10th every month at 04:00
+    public $cronRefetch = "0 4 10 * *";
+
     /**
      * @inheritdoc
      */
@@ -100,6 +103,17 @@ class SinkFara extends SinkBase
         $matches = [];
         $hits = preg_match('|(?P<date>\d{4}-\d{2}-\d{2})\.zip$|', $filename, $matches);
         return $hits ? $matches['date'] : null;
+    }
+
+    /**
+     * Re-fetch entire previous month's worth of data.
+     */
+    public function refetchIdRange(): array
+    {
+        return [
+            today()->subMonth()->startOfMonth()->format('Y-m-d'),
+            today()->subMonth()->endOfMonth()->format('Y-m-d'),
+        ];
     }
 
     protected function filename($name): string

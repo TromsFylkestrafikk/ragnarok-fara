@@ -1,6 +1,9 @@
 # Change Log
 
 ## [Unreleased]
+### Added
+- Implemented re-fetch API to fetch entire previous month on the 10th.
+
 ### Fixed
 - Allowing negative sales amount to be stored in the database.
 

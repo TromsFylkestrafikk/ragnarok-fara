@@ -165,7 +165,7 @@ return new class extends Migration
             $table->smallInteger('custprofileid')->comment('Customer profile ID');
             $table->smallInteger('paymentmethodid')->comment('Payment method ID');
             $table->integer('vehiclerunno')->comment('Vehicle run number');
-            $table->unsignedFloat('amountofproductssale', 10, 3)->nullable()->default(NULL);
+            $table->float('amountofproductssale', 10, 3)->nullable()->default(NULL);
             $table->integer('numberofproductssale')->nullable();
             $table->unsignedBigInteger('clearingperiodida');
             $table->timestamp('lastupdated')->nullable()->comment('Last updated. Date/time');

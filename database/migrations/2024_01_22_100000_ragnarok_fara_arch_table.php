@@ -19,8 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('operatorid')->comment('Operator ID');
             $table->integer('producttemplateno')->comment('Reference: fara_basic_template.templateid');
             $table->smallInteger('customerprofileid')->comment('Reference: fara_customer_profile.custprofileid');
-            $table->unsignedFloat('amount', 13, 4)->comment('Total amount');
-            $table->unsignedFloat('vatamount', 13, 4)->comment('VAT');
+            $table->float('amount', 13, 4)->comment('Total amount');
+            $table->float('vatamount', 13, 4)->comment('VAT');
             $table->smallInteger('numberofpassengers')->comment('Passenger count');
         });
     }

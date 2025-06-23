@@ -51,26 +51,33 @@ class FaraImporter
 
     public function import(string $file)
     {
+        $this->debug('%s: Importing ...', basename($file));
         $records = 0;
-        if (($handle = fopen($file, 'r')) !== false) {
-            $table = $this->localTables[basename($file)];
-            $feeder = new DbBulkInsert($table, 'upsert');
-            $dbCols = array_diff(fgetcsv($handle), $this->columnFilter[$table]);
-            $feeder->unique($dbCols);
-            while (($values = fgetcsv($handle)) !== false) {
-                foreach ($values as $k => $val) {
-                    $value = trim($val, '"');
-                    if (strlen($value) === 0) {
-                        $values[$k] = null;
-                    }
-                }
-                $dbVals = array_filter($values, fn($key) => array_key_exists($key, $dbCols), ARRAY_FILTER_USE_KEY);
-                $feeder->addRecord(array_combine($dbCols, $dbVals));
-                $records += 1;
-            }
-            fclose($handle);
-            $feeder->flush();
+        if (($handle = fopen($file, 'r')) === false) {
+            return $records;
         }
+        $table = $this->localTables[basename($file)];
+        $feeder = new DbBulkInsert($table, 'upsert');
+        $headers = fgetcsv($handle);
+        if (! is_array($headers)) {
+            $this->notice("%s: Empty csv", basename($file));
+            return $records;
+        }
+        $dbCols = array_diff($headers, $this->columnFilter[$table]);
+        $feeder->unique($dbCols);
+        while (($values = fgetcsv($handle)) !== false) {
+            foreach ($values as $k => $val) {
+                $value = trim($val, '"');
+                if (strlen($value) === 0) {
+                    $values[$k] = null;
+                }
+            }
+            $dbVals = array_filter($values, fn($key) => array_key_exists($key, $dbCols), ARRAY_FILTER_USE_KEY);
+            $feeder->addRecord(array_combine($dbCols, $dbVals));
+            $records += 1;
+        }
+        fclose($handle);
+        $feeder->flush();
         $this->debug('%s: Imported %d records', basename($file), $records);
         return $records;
     }

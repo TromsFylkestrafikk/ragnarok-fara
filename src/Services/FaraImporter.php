@@ -57,6 +57,7 @@ class FaraImporter
 
     public function import(string $file)
     {
+        $this->debug('%s: Importing ...', basename($file));
         $records = 0;
         if (($handle = fopen($file, 'r')) === false) {
             return $records;

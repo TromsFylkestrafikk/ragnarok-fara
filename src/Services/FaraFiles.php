@@ -16,7 +16,7 @@ class FaraFiles
     {
         // List of FARA connection models that are relatively straight forward
         // to import, The value is a closure used to filter the eloquent
-        // builder. 
+        // builder.
         $simpleModels = [
             'BasicJourney' => null,
             'BasicLine' => null,

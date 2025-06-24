@@ -5,6 +5,7 @@
 ### Added
 
 - Implemented re-fetch API to fetch entire previous month on the 10th.
+- Added transaction tables making it possible to pin-point FLVe transactions.
 
 ### Fixed
 

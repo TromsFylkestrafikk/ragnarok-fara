@@ -2,26 +2,37 @@
 
 namespace Ragnarok\Fara\Services;
 
+use Illuminate\Support\Facades\DB;
 use Ragnarok\Fara\Models\BasicJourney;
 use Ragnarok\Fara\Models\BasicLine;
 use Ragnarok\Fara\Models\BasicStop;
 use Ragnarok\Fara\Models\BasicTemplate;
 use Ragnarok\Fara\Models\Company;
 use Ragnarok\Fara\Models\CustomerProfile;
+use Ragnarok\Fara\Models\EmvTransaction;
+use Ragnarok\Fara\Models\EmvTransRawTrans;
+use Ragnarok\Fara\Models\RawTransaction;
 use Ragnarok\Fara\Models\StatLoad;
 use Ragnarok\Fara\Models\StatTrafficCustProfile;
 use Ragnarok\Fara\Models\StatTrafficIncome;
+use Ragnarok\Sink\Traits\LogPrintf;
 
 class FaraFiles
 {
+    use LogPrintf;
     protected const SEPARATOR = ',';
 
     public function getData(string $id)
     {
+        $data = [];
+
+        $this->logPrintfInit("[Fara %s]: ", $id);
+        $this->debug("Initializing import ...");
         $columnNames = collect(BasicJourney::first())->keys()->toArray();
         $data['basicjourney'] = [implode(self::SEPARATOR, $columnNames)];
         $rows = BasicJourney::get()->toArray();
         $this->convertToCsv($data, 'basicjourney', $rows);
+        $this->debug("Converting %s", 'basicjourney');
 
         $columnNames = collect(BasicLine::first())->keys()->toArray();
         $data['basicline'] = [implode(self::SEPARATOR, $columnNames)];
@@ -62,6 +73,29 @@ class FaraFiles
         $data['stattrafficincome'] = [implode(self::SEPARATOR, $columnNames)];
         $rows = StatTrafficIncome::where('dat', $id)->get()->toArray();
         $this->convertToCsv($data, 'stattrafficincome', $rows);
+
+        $columnNames = collect(EmvTransaction::first())->keys()->toArray();
+        $data['emvtransaction'] = [implode(self::SEPARATOR, $columnNames)];
+        $rows = EmvTransaction::whereDate('transactiondatetime', $id)
+            ->get()
+            ->toArray();
+        $this->convertToCsv($data, 'emvtransaction', $rows);
+
+        $columnNames = collect(RawTransaction::first())->keys()->toArray();
+        $data['rawtransaction'] = [implode(self::SEPARATOR, $columnNames)];
+        $rows = RawTransaction::whereDate('eventtimestamp', $id)->get()->toArray();
+        $this->convertToCsv($data, 'rawtransaction', $rows);
+
+        $columnNames = collect(EmvTransRawTrans::first())->keys()->toArray();
+        $data['emvtransrawtrans'] = [implode(self::SEPARATOR, $columnNames)];
+        $rows = DB::connection('fara_remote')
+            ->table('emvtransrawtrans', 'piv')
+            ->join('emvtransaction as emv', 'emv.emvtransida', '=', 'piv.emvtransida')
+            ->select("piv.*")
+            ->whereDate('emv.transactiondatetime', $id)
+            ->get()
+            ->toArray();
+        $this->convertToCsv($data, 'emvtransrawtrans', $rows);
         return $data;
     }
 

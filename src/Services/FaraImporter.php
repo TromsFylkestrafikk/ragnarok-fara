@@ -21,6 +21,9 @@ class FaraImporter
         'basictemplate.csv' => 'fara_basic_template',
         'company.csv' => 'fara_company',
         'customerprofile.csv' => 'fara_customer_profile',
+        'emvtransaction.csv' => 'fara_emv_transaction',
+        'emvtransrawtrans.csv' => 'fara_emv_trans_raw_trans',
+        'rawtransaction.csv' => 'fara_raw_transaction',
         'statload.csv' => 'fara_stat_load',
         'stattrafficcustprofile.csv' => 'fara_stat_traffic_cust_profile',
         'stattrafficincome.csv' => 'fara_stat_traffic_income',
@@ -39,6 +42,9 @@ class FaraImporter
         'fara_basic_template' => [],
         'fara_company' => ['companyshortname', 'csurl', 'address', 'postalcodeid', 'accountnumber'],
         'fara_customer_profile' => [],
+        'fara_emv_transaction' => [],
+        'fara_emv_trans_raw_trans' => [],
+        'fara_raw_transaction' => [],
         'fara_stat_load' => [],
         'fara_stat_traffic_cust_profile' => [],
         'fara_stat_traffic_income' => [],
@@ -51,7 +57,6 @@ class FaraImporter
 
     public function import(string $file)
     {
-        $this->debug('%s: Importing ...', basename($file));
         $records = 0;
         if (($handle = fopen($file, 'r')) === false) {
             return $records;
@@ -85,6 +90,16 @@ class FaraImporter
     public function deleteImport(string $id)
     {
         DB::table('fara_arch')->whereDate('eventdatetime', $id)->delete();
+        $emvQuery = DB::table('fara_emv_transaction')
+            ->select('emvtransida')
+            ->whereDate('transactiondatetime', $id);
+        DB::table('fara_emv_trans_raw_trans')
+            ->whereIn('emvtransida', $emvQuery)
+            ->delete();
+        $emvQuery->delete();
+        DB::table('fara_raw_transaction')
+            ->whereDate('eventtimestamp', $id)
+            ->delete();
         DB::table('fara_stat_load')->where('dat', $id)->delete();
         DB::table('fara_stat_traffic_cust_profile')->where('dat', $id)->delete();
         DB::table('fara_stat_traffic_income')->where('dat', $id)->delete();

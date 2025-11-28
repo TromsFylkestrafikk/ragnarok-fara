@@ -16,8 +16,12 @@ class SinkFara extends SinkBase
     public static $id = "fara";
     public static $title = "Fara";
 
-    // Re-fetch the 10th every month at 04:00
-    public $cronRefetch = "0 4 10 * *";
+    // Re-fetch last month at the 10th every month at 04:00
+    // Re-fetch last week every Monday at 04:30
+    public $cronRefetchAndImport = [
+        ['30 4 * * 1', 'weekly'],
+        ['0 4 10 * *', 'monthly']
+    ];
 
     /**
      * @inheritdoc
@@ -109,13 +113,31 @@ class SinkFara extends SinkBase
     }
 
     /**
-     * Re-fetch entire previous month's worth of data.
+     * @inheritdoc
      */
-    public function refetchIdRange(): array
+    public function refetchAndImportIdRange(string $range): array
+    {
+        return match ($range) {
+            'weekly' => $this->getWeeklyIdsRange(),
+            'monthly' => $this->getMonthlyIdsRange(),
+            default => [],
+        };
+        return [];
+    }
+
+    protected function getMonthlyIdsRange(): array
     {
         return [
             today()->subMonth()->startOfMonth()->format('Y-m-d'),
             today()->subMonth()->endOfMonth()->format('Y-m-d'),
+        ];
+    }
+
+    protected function getWeeklyIdsRange(): array
+    {
+        return [
+            today()->subWeek()->startOfWeek()->format('Y-m-d'),
+            today()->subWeek()->endOfWeek()->format('Y-m-d')
         ];
     }
 
